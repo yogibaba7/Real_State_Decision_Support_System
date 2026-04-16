@@ -3,6 +3,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib
+import os 
+import gdown
 
 st.set_page_config(page_title="Price Prediction", page_icon="💰", layout="wide")
 
@@ -10,9 +12,19 @@ st.title("💰 Price Prediction Module")
 
 @st.cache_resource
 def load_model():
-    return joblib.load("models/pipeline.joblib")
+    if not os.path.exists("model.pkl"):
+        url = "https://drive.google.com/file/d/1wr_2Y1gnnBkuiMqO2f1v-ALfZmnBHJSF/view?usp=drive_link"
+        gdown.download(url, "model.pkl", quiet=False)
+    
+    return joblib.load("model.pkl")
 
 model = load_model()
+
+# @st.cache_resource
+# def load_model():
+#     return joblib.load("models/pipeline.joblib")
+
+# model = load_model()
 
 df = pd.read_csv("data/missing_imputeted_df.csv")
 

@@ -5,6 +5,8 @@ from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics.pairwise import cosine_similarity
 import joblib
+import os
+import gdown
 
 # =========================
 # PAGE CONFIG
@@ -12,15 +14,73 @@ st.set_page_config(page_title="🏠 Property Recommendation System", page_icon="
 # =========================
 st.title("🏠 Property Recommendation System")
 
+def download_model(file_id, output):
+    if not os.path.exists(output):
+        url = f"https://drive.google.com/uc?id={file_id}"
+        with st.spinner(f"Downloading {output}... ⏳"):
+            gdown.download(url, output, quiet=False)
+
+
+# =========================
+# AREA SIM
+# =========================
+@st.cache_resource
+def load_areasim():
+    download_model("1puvxRV4Swbn2UrAAeMG4lu6ZKsfOgCta", "area_sim.joblib")
+    model = joblib.load("area_sim.joblib")
+
+    # safety check
+    if hasattr(model, "shape"):
+        st.write("Area sim shape:", model.shape)
+
+    return model
+
+area_sim = load_areasim()
+
+
+# =========================
+# PRICE SIM
+# =========================
+@st.cache_resource
+def load_pricesim():
+    download_model("1L-YjTIyQmks3WsMg8amNjh03v1XZfajz", "price_sim.joblib")
+    model = joblib.load("price_sim.joblib")
+
+    # safety check
+    if hasattr(model, "shape"):
+        st.write("Price sim shape:", model.shape)
+
+    return model
+
+price_sim = load_pricesim()
+
+
+# =========================
+# FACILITY SIM
+# =========================
+@st.cache_resource
+def load_facilitysim():
+    download_model("1wyKoIAi0dJaAajYjW365Ye1Z-nkSFTXn", "facility_sim.joblib")
+    model = joblib.load("facility_sim.joblib")
+
+    # safety check
+    if hasattr(model, "shape"):
+        st.write("Facility sim shape:", model.shape)
+
+    return model
+
+facility_sim = load_facilitysim()
+
+
 # load data
 df = pd.read_csv("data/missing_imputeted_df.csv")
-price_sim =joblib.load("models/price_sim.joblib")
-area_sim = joblib.load("models/area_sim.joblib")
-facility_sim = joblib.load("models/facility_sim.joblib")
+# price_sim =joblib.load("models/price_sim.joblib")
+# area_sim = joblib.load("models/area_sim.joblib")
+# facility_sim = joblib.load("models/facility_sim.joblib")
 
 # recommendation function
 def recommend_properties(idx, sim1=price_sim,sim2=area_sim,sim3=facility_sim):
-
+    print(sim1.shape,sim2.shape,sim3.shape)
     # combine similarity
     price_w = 0.9
     area_w = 0.6

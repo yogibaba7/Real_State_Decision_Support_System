@@ -13,6 +13,8 @@ import plotly.express as px
 import shap
 import matplotlib.pyplot as plt
 from st_aggrid import AgGrid, GridOptionsBuilder
+import os 
+import gdown
 
 
 # =========================
@@ -23,9 +25,28 @@ st.set_page_config(page_title="Insight Module", page_icon="📊", layout="wide")
 st.title("🏠 Smart Real Estate Insight Module")
 st.markdown("### Understand how each feature impacts property price")
 
+@st.cache_resource
+def load_data1():
+    if not os.path.exists("insight_df.joblib"):
+        url = "https://drive.google.com/file/d/1hDGpVEenCaRy31PT_b9BHdg6XeLzUBIs/view?usp=drive_link"
+        gdown.download(url, "insight_df.joblib", quiet=False)
+    
+    return joblib.load("insight_df.joblib")
 
-df = joblib.load("models/insight_df.joblib")
-top20 = joblib.load("models/top10features.joblib")
+df = load_data1()
+
+@st.cache_resource
+def load_data2():
+    if not os.path.exists("top10features.joblib"):
+        url = "https://drive.google.com/file/d/1iQbtYsE_1lWwLXGu6BRoXKabm7ORf9eg/view?usp=drive_link"
+        gdown.download(url, "top10features.joblib", quiet=False)
+    
+    return joblib.load("top10features.joblib")
+
+top20 = load_data2()
+
+# df = joblib.load("models/insight_df.joblib")
+# top20 = joblib.load("models/top10features.joblib")
 inputs = df.drop(columns='price_outer')
 output = df['price_outer']
 output_log = np.log1p(output)
